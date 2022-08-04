@@ -6,7 +6,7 @@ import 'package:planningpoker/domain/poker_state.dart';
 
 class PokerRepository {
   final PokerApi _api;
-  String? _session;
+  _RoomSession? _roomSession;
 
   PokerRepository(this._api);
 
@@ -39,28 +39,48 @@ class PokerRepository {
 
   Future<T> withSession<T>(
       String roomId, Future<T> Function(String session) action) async {
-    final session = await _getSession(roomId);
+    final roomSession = await _getSession(roomId);
     try {
-      return action(session);
+      return action(roomSession.session);
     } on PokerAuthException {
-      if (_session == session) {
-        _session = null;
+      if (_roomSession == roomSession) {
+        _roomSession = null;
       }
-      final newSession = await _getSession(roomId);
-      return action(newSession);
+      final newRoomSession = await _getSession(roomId);
+      return action(newRoomSession.session);
     }
   }
 
-  Future<String> _getSession(String roomId) async {
-    var session = _session;
-    if (session == null) {
-      session = await _createSession(roomId);
-      _session = session;
+  Future<_RoomSession> _getSession(String roomId) async {
+    final roomSession = _roomSession;
+    if (roomSession != null && roomSession.roomId == roomId) {
+      return roomSession;
     }
-    return session;
+    final session = await _createSession(roomId);
+    final newRoomSession = _RoomSession(roomId, session);
+    _roomSession = newRoomSession;
+    return newRoomSession;
   }
 
   Future<String> _createSession(String roomId) async {
     return _api.getSession(roomId);
   }
+}
+
+class _RoomSession {
+  String roomId;
+  String session;
+
+  _RoomSession(this.roomId, this.session);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _RoomSession &&
+          runtimeType == other.runtimeType &&
+          roomId == other.roomId &&
+          session == other.session;
+
+  @override
+  int get hashCode => roomId.hashCode ^ session.hashCode;
 }
