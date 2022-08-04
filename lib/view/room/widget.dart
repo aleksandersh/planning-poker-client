@@ -75,13 +75,6 @@ class RoomScreenWidget extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                "link: ${model.state.currentGame.link}",
-                style: const TextStyle(
-                  color: pokerColor1,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
                 "status: ${model.state.currentGame.status}",
                 style: const TextStyle(
                   color: gameColorText1,
@@ -102,6 +95,32 @@ class RoomScreenWidget extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
+              if (model.state.isOwner)
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.visibility,
+                          color: gameColorText1, size: 24.0),
+                      onPressed: () {
+                        model.onClickShowCards();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.restart_alt,
+                          color: gameColorText1, size: 24.0),
+                      onPressed: () {
+                        model.onClickResetGame();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.play_arrow,
+                          color: gameColorText1, size: 24.0),
+                      onPressed: () {
+                        model.onClickStartNextGame();
+                      },
+                    ),
+                  ],
+                ),
             ],
           ));
 

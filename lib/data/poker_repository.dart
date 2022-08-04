@@ -15,28 +15,39 @@ class PokerRepository {
   }
 
   Future<PokerRoom?> getRoom(String roomId, String? commit) async {
-    final session = await _getSession(roomId);
-    try {
-      return await _api.getRoom(session, roomId, commit);
-    } on PokerAuthException {
-      if (_session == session) {
-        _session = null;
-      }
-      final newSession = await _getSession(roomId);
-      return await _api.getRoom(newSession, roomId, commit);
-    }
+    return withSession(
+        roomId, (session) => _api.getRoom(session, roomId, commit));
   }
 
   Future sendScore(String roomId, int score) async {
+    return withSession(
+        roomId, (session) => _api.sendScore(session, roomId, score));
+  }
+
+  Future showCards(String roomId) async {
+    return withSession(roomId, (session) => _api.showCards(session, roomId));
+  }
+
+  Future resetGame(String roomId) async {
+    return withSession(roomId, (session) => _api.resetGame(session, roomId));
+  }
+
+  Future startNextGame(String roomId) async {
+    return withSession(
+        roomId, (session) => _api.startNextGame(session, roomId));
+  }
+
+  Future<T> withSession<T>(
+      String roomId, Future<T> Function(String session) action) async {
     final session = await _getSession(roomId);
     try {
-      return _api.sendScore(session, roomId, score);
+      return action(session);
     } on PokerAuthException {
       if (_session == session) {
         _session = null;
       }
       final newSession = await _getSession(roomId);
-      return _api.sendScore(newSession, roomId, score);
+      return action(newSession);
     }
   }
 

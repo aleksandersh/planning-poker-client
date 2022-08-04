@@ -51,9 +51,33 @@ class PokerApi {
     _checkForSuccessResponse(response, "Failed to send score");
   }
 
+  Future showCards(String session, String roomId) async {
+    final url = _createUrl("/v1/rooms/$roomId/currentgame");
+    final body = jsonEncode(<String, dynamic>{'complete': true});
+    final response = await _client.patch(url,
+        headers: {'Authorization': session}, body: body);
+    _checkForSuccessResponse(response, "Failed to show cards");
+  }
+
+  Future resetGame(String session, String roomId) async {
+    final url = _createUrl("/v1/rooms/$roomId/currentgame");
+    final body = jsonEncode(<String, dynamic>{'reset': true});
+    final response = await _client.patch(url,
+        headers: {'Authorization': session}, body: body);
+    _checkForSuccessResponse(response, "Failed to reset game");
+  }
+
+  Future startNextGame(String session, String roomId) async {
+    final url = _createUrl("/v1/rooms/$roomId/games");
+    final response =
+        await _client.post(url, headers: {'Authorization': session});
+    _checkForSuccessResponse(response, "Failed to start next game");
+  }
+
   PokerRoom _parseRoom(String body) {
     final json = jsonDecode(body) as Map<String, dynamic>;
 
+    final isOwner = json['owner'] as bool? ?? false;
     final playerId = json['player_id'] as String;
     final commit = json['commit'] as String;
 
@@ -73,6 +97,7 @@ class PokerApi {
     }).toList();
 
     return PokerRoom(
+      isOwner,
       commit,
       currentGame,
       players,

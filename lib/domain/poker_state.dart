@@ -1,10 +1,12 @@
 class PokerRoom {
+  final bool isOwner;
   final String? commit;
   final PokerCurrentGame currentGame;
   final List<PokerPlayer> players;
   final List<PokerGame> games;
 
-  PokerRoom(this.commit, this.currentGame, this.players, this.games);
+  PokerRoom(
+      this.isOwner, this.commit, this.currentGame, this.players, this.games);
 }
 
 class PokerCurrentGame {

@@ -8,6 +8,7 @@ import 'package:planningpoker/view/app/router.dart';
 
 PokerRoom _createInitialState() {
   return PokerRoom(
+    false,
     null,
     PokerCurrentGame(
       "",
@@ -46,10 +47,44 @@ class RoomStateModel extends ChangeNotifier {
   onClickScore(int score) async {
     try {
       await _sendScore(score);
-    } on ResourceNotFoundException {
-      _disposeClient();
+    } on ResourceNotFoundException catch (error) {
+      log("Failed to send score, resource not found", error: error);
+      _onRoomError();
     } catch (error) {
       log("Failed to send score", error: error);
+    }
+  }
+
+  onClickShowCards() async {
+    try {
+      _pokerRepository.showCards(_roomId);
+    } on ResourceNotFoundException catch (error) {
+      log("Failed to show cards, resource not found", error: error);
+      _onRoomError();
+    } catch (error) {
+      log("Failed to show cards", error: error);
+    }
+  }
+
+  onClickResetGame() async {
+    try {
+      _pokerRepository.resetGame(_roomId);
+    } on ResourceNotFoundException catch (error) {
+      log("Failed to reset game, resource not found", error: error);
+      _onRoomError();
+    } catch (error) {
+      log("Failed to reset game", error: error);
+    }
+  }
+
+  onClickStartNextGame() async {
+    try {
+      _pokerRepository.startNextGame(_roomId);
+    } on ResourceNotFoundException catch (error) {
+      log("Failed to start next game, resource not found", error: error);
+      _onRoomError();
+    } catch (error) {
+      log("Failed to start next game", error: error);
     }
   }
 
@@ -67,9 +102,9 @@ class RoomStateModel extends ChangeNotifier {
         state = room;
         notifyListeners();
       }
-    } on ResourceNotFoundException {
-      _appRouter.showEntry();
-      _disposeClient();
+    } on ResourceNotFoundException catch (error) {
+      log("Failed to get room, resource not found", error: error);
+      _onRoomError();
     } catch (error) {
       log("Failed to get room", error: error);
     }
@@ -77,6 +112,11 @@ class RoomStateModel extends ChangeNotifier {
 
   Future _sendScore(int score) async {
     await _pokerRepository.sendScore(_roomId, score);
+  }
+
+  _onRoomError() {
+    _disposeClient();
+    _appRouter.showEntry();
   }
 
   _disposeClient() {
