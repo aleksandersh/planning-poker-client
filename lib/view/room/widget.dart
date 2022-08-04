@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planningpoker/domain/poker_state.dart';
 import 'package:planningpoker/poker_theme.dart';
-import 'package:planningpoker/room_state_model.dart';
+import 'package:planningpoker/view/room/state_model.dart';
 import 'package:provider/provider.dart';
 
 class RoomScreenWidget extends StatelessWidget {

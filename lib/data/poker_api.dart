@@ -11,15 +11,17 @@ class PokerApi {
 
   PokerApi(this._host, this._client);
 
-  Future<String> getSession(String roomId, String? playerName) async {
+  Future<String> createRoom() async {
+    final url = _createUrl("/v1/rooms");
+    final response = await _client.post(url);
+    _checkForSuccessResponse(response, "Failed to create room");
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return json['room_id'] as String;
+  }
+
+  Future<String> getSession(String roomId) async {
     final url = _createUrl("/v1/rooms/$roomId/players");
-    final String body;
-    if (playerName != null) {
-      body = jsonEncode(<String, String>{'name': playerName});
-    } else {
-      body = "";
-    }
-    final response = await _client.post(url, body: body);
+    final response = await _client.post(url);
     _checkForSuccessResponse(response, "Failed to create player");
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     return json['access_token'] as String;
