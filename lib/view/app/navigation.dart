@@ -35,13 +35,15 @@ class AppRouteParser extends RouteInformationParser<AppPath> {
   }
 
   @override
-  RouteInformation restoreRouteInformation(AppPath configuration) {
+  RouteInformation? restoreRouteInformation(AppPath configuration) {
     if (configuration is RoomPath) {
       return RouteInformation(
           location: '/$_pathSegmentRooms/${configuration.roomId}');
-    } else {
+    }
+    if (configuration is EntryPath) {
       return const RouteInformation(location: '/');
     }
+    return null;
   }
 }
 
@@ -50,6 +52,9 @@ class AppRouterDelegate extends RouterDelegate<AppPath>
     implements AppRouter {
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  AppPath get currentConfiguration => _currentPath;
 
   final AppDependencies _dependencies = AppDependencies();
   AppPath _currentPath = EntryPath();
