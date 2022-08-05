@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:planningpoker/dependencies.dart';
 import 'package:planningpoker/view/app/router.dart';
@@ -19,19 +20,18 @@ const _pathSegmentRooms = 'rooms';
 
 class AppRouteParser extends RouteInformationParser<AppPath> {
   @override
-  Future<AppPath> parseRouteInformation(
-      RouteInformation routeInformation) async {
+  Future<AppPath> parseRouteInformation(RouteInformation routeInformation) {
     final location = routeInformation.location;
     if (location == null) {
-      return EntryPath();
+      return SynchronousFuture(EntryPath());
     }
     final uri = Uri.parse(location);
     if (uri.pathSegments.length > 1 &&
         uri.pathSegments[0] == _pathSegmentRooms) {
       final roomId = uri.pathSegments[1];
-      return RoomPath(roomId);
+      return SynchronousFuture(RoomPath(roomId));
     }
-    return EntryPath();
+    return SynchronousFuture(EntryPath());
   }
 
   @override
@@ -100,8 +100,9 @@ class AppRouterDelegate extends RouterDelegate<AppPath>
   }
 
   @override
-  Future<void> setNewRoutePath(AppPath configuration) async {
+  Future<void> setNewRoutePath(AppPath configuration) {
     _currentPath = configuration;
+    return SynchronousFuture(null);
   }
 
   @override
@@ -114,5 +115,10 @@ class AppRouterDelegate extends RouterDelegate<AppPath>
   void showRoom(String roomId) {
     _currentPath = RoomPath(roomId);
     notifyListeners();
+  }
+
+  @override
+  Future<bool> popRoute() {
+    return SynchronousFuture(_currentPath is EntryPath);
   }
 }
